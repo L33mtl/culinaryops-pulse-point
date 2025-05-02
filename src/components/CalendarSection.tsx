@@ -119,16 +119,16 @@ const CalendarSection: React.FC = () => {
   };
   
   // Custom rendering for calendar days to show event indicators
-  const renderDayContent = (day: Date) => {
-    const hasEvent = dateHasEvent(day);
+  const renderDayContent = (props: { date: Date; displayMonth: Date }) => {
+    const hasEvent = dateHasEvent(props.date);
     
     if (hasEvent) {
-      const events = culinaryEvents.filter(event => isSameDay(day, event.date));
+      const events = culinaryEvents.filter(event => isSameDay(props.date, event.date));
       const eventTypes = [...new Set(events.map(e => e.type))];
       
       return (
         <div className="relative h-full w-full">
-          {day.getDate()}
+          {props.date.getDate()}
           <div className="absolute -bottom-1 left-0 right-0 flex justify-center gap-0.5">
             {eventTypes.includes("holiday") && <span className="h-1 w-1 rounded-full bg-green-500"></span>}
             {eventTypes.includes("festival") && <span className="h-1 w-1 rounded-full bg-accent"></span>}
@@ -138,7 +138,7 @@ const CalendarSection: React.FC = () => {
       );
     }
     
-    return day.getDate();
+    return <>{props.date.getDate()}</>;
   };
 
   return (
@@ -168,7 +168,7 @@ const CalendarSection: React.FC = () => {
                     onMonthChange={setCurrentMonth}
                     className="rounded-md border shadow-sm pointer-events-auto"
                     components={{
-                      DayContent: ({ day }) => renderDayContent(day),
+                      DayContent: (props) => renderDayContent(props),
                     }}
                   />
                 </CardContent>
@@ -185,7 +185,7 @@ const CalendarSection: React.FC = () => {
                     onMonthChange={setNextMonth}
                     className="rounded-md border shadow-sm pointer-events-auto"
                     components={{
-                      DayContent: ({ day }) => renderDayContent(day),
+                      DayContent: (props) => renderDayContent(props),
                     }}
                   />
                 </CardContent>
