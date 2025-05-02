@@ -5,7 +5,7 @@ import { format, parseISO } from "date-fns";
 export interface CulinaryEvent {
   id: number;
   title: string;
-  date: Date; // Changed from string to Date
+  date: Date;
   type: "festival" | "exhibition" | "holiday" | "conference" | "workshop";
   description: string;
   location: string;
@@ -15,13 +15,22 @@ export interface CulinaryEvent {
 
 export async function fetchCulinaryEvents(): Promise<CulinaryEvent[]> {
   try {
+    // Try to fetch the JSON file, but return default events if there's any issue
     const response = await fetch("/data/culinary_events.json");
     
     if (!response.ok) {
       throw new Error(`Failed to fetch events: ${response.status}`);
     }
     
-    const data = await response.json();
+    const text = await response.text();
+    
+    // Check if the response is HTML (meaning the file doesn't exist or returns HTML)
+    if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+      throw new Error('Received HTML instead of JSON');
+    }
+    
+    const data = JSON.parse(text);
+    
     return data.data.map((event: any) => ({
       ...event,
       date: event.date ? parseISO(event.date) : new Date()

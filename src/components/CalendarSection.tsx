@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { format, addMonths, isSameDay } from "date-fns";
+import { format, addMonths, isSameDay, isValid } from "date-fns";
 import { fetchCulinaryEvents, type CulinaryEvent } from "@/services/eventService";
 import { toast } from "sonner";
 import CalendarDayContent from "./CalendarDayContent";
@@ -25,12 +25,15 @@ const CalendarSection: React.FC = () => {
       try {
         setIsLoading(true);
         const events = await fetchCulinaryEvents();
-        setCulinaryEvents(events);
+        
+        // Ensure all events have valid dates
+        const validEvents = events.filter(event => event.date && isValid(event.date));
+        setCulinaryEvents(validEvents);
         
         // Set initial selected events
         if (selectedDate) {
-          setSelectedEvents(events.filter(event => 
-            isSameDay(new Date(event.date), selectedDate)
+          setSelectedEvents(validEvents.filter(event => 
+            isSameDay(event.date, selectedDate)
           ));
         }
       } catch (error) {
@@ -48,7 +51,7 @@ const CalendarSection: React.FC = () => {
   useEffect(() => {
     if (selectedDate) {
       setSelectedEvents(culinaryEvents.filter(event => 
-        isSameDay(new Date(event.date), selectedDate)
+        isSameDay(event.date, selectedDate)
       ));
     } else {
       setSelectedEvents([]);
@@ -66,18 +69,30 @@ const CalendarSection: React.FC = () => {
 
   const getCurrentMonthEvents = () => {
     return culinaryEvents.filter(event => {
-      const eventDate = new Date(event.date);
-      return eventDate.getMonth() === currentMonth.getMonth() && 
+      const eventDate = event.date;
+      return isValid(eventDate) && 
+             eventDate.getMonth() === currentMonth.getMonth() && 
              eventDate.getFullYear() === currentMonth.getFullYear();
     });
   };
   
   const getNextMonthEvents = () => {
     return culinaryEvents.filter(event => {
-      const eventDate = new Date(event.date);
-      return eventDate.getMonth() === nextMonth.getMonth() && 
+      const eventDate = event.date;
+      return isValid(eventDate) &&
+             eventDate.getMonth() === nextMonth.getMonth() && 
              eventDate.getFullYear() === nextMonth.getFullYear();
     });
+  };
+
+  const safeFormat = (date: Date | undefined, formatString: string) => {
+    if (!date || !isValid(date)) return "Invalid Date";
+    try {
+      return format(date, formatString);
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Invalid Date";
+    }
   };
 
   return (
@@ -98,8 +113,8 @@ const CalendarSection: React.FC = () => {
           <div className="md:col-span-2">
             <Tabs defaultValue="thisMonth" className="w-full" onValueChange={handleTabChange}>
               <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="thisMonth">{format(currentMonth, "MMMM yyyy")}</TabsTrigger>
-                <TabsTrigger value="nextMonth">{format(nextMonth, "MMMM yyyy")}</TabsTrigger>
+                <TabsTrigger value="thisMonth">{safeFormat(currentMonth, "MMMM yyyy")}</TabsTrigger>
+                <TabsTrigger value="nextMonth">{safeFormat(nextMonth, "MMMM yyyy")}</TabsTrigger>
               </TabsList>
               <TabsContent value="thisMonth" className="mt-0">
                 <Card>
@@ -115,7 +130,7 @@ const CalendarSection: React.FC = () => {
                         DayContent: (props) => (
                           <CalendarDayContent 
                             date={props.date} 
-                            displayMonth={props.displayMonth} 
+                            displayMonth={currentMonth} 
                             events={culinaryEvents} 
                           />
                         ),
@@ -138,7 +153,7 @@ const CalendarSection: React.FC = () => {
                         DayContent: (props) => (
                           <CalendarDayContent 
                             date={props.date} 
-                            displayMonth={props.displayMonth} 
+                            displayMonth={nextMonth} 
                             events={culinaryEvents} 
                           />
                         ),
@@ -156,7 +171,7 @@ const CalendarSection: React.FC = () => {
             {selectedEvents.length > 0 ? (
               <EventCard 
                 events={selectedEvents}
-                title={format(selectedDate!, "MMMM d, yyyy")}
+                title={selectedDate && isValid(selectedDate) ? safeFormat(selectedDate, "MMMM d, yyyy") : "Selected Date"}
                 description={`${selectedEvents.length} event${selectedEvents.length > 1 ? 's' : ''} scheduled`}
               />
             ) : (
@@ -165,11 +180,11 @@ const CalendarSection: React.FC = () => {
                   ? getCurrentMonthEvents().slice(0, 3) 
                   : getNextMonthEvents().slice(0, 3)
                 }
-                title={selectedDate 
-                  ? `${format(selectedDate, "MMMM d, yyyy")} - No Events` 
+                title={selectedDate && isValid(selectedDate)
+                  ? `${safeFormat(selectedDate, "MMMM d, yyyy")} - No Events` 
                   : "Upcoming Events"
                 }
-                description={selectedDate 
+                description={selectedDate && isValid(selectedDate)
                   ? "No events scheduled for this day" 
                   : "Select a date to see details"
                 }
