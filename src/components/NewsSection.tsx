@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface NewsArticle {
   id: number;
@@ -85,38 +86,63 @@ const NewsSection: React.FC = () => {
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchNews = async () => {
       setLoading(true);
       try {
-        // Simulate API call to our Python backend
-        // In a real implementation, this would call an actual API endpoint
-        // that runs the Python script in scripts/news_scraper.py
+        // Here we use a combination of the news API and web scraping
+        // This would be connected to our Python backend in production
+        const sources = [
+          { url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.foodandwine.com%2Frss%2Fsynd%2Flatest', source: 'Food & Wine' },
+          { url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.eater.com%2Frss%2Findex.xml', source: 'Eater' },
+          { url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fthespoon.tech%2Ffeed%2F', source: 'The Spoon' }
+        ];
         
-        // Simulated API response delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        const newsArticles: NewsArticle[] = [];
+        const fetchPromises = sources.map(async (source) => {
+          try {
+            const response = await fetch(source.url);
+            const data = await response.json();
+            
+            if (data.status === 'ok' && data.items) {
+              const articles = data.items.slice(0, 4).map((item: any, index: number) => ({
+                id: `${source.source.toLowerCase().replace(/\s+/g, '-')}-${index}`,
+                title: item.title,
+                source: source.source,
+                date: new Date(item.pubDate).toLocaleDateString('en-US', { 
+                  month: 'long', 
+                  day: 'numeric', 
+                  year: 'numeric' 
+                }),
+                snippet: item.description.replace(/<[^>]*>?/gm, '').substring(0, 150) + '...',
+                image: item.enclosure?.link || 
+                       (item.content && item.content.match(/src="([^"]+)"/)?.[1]) || 
+                       `https://source.unsplash.com/random/600x400/?food,${source.source}`,
+                url: item.link
+              }));
+              newsArticles.push(...articles);
+            }
+          } catch (error) {
+            console.error(`Error fetching from ${source.source}:`, error);
+          }
+        });
         
-        // Use the Python-scraped news or fallback to mock data
-        // This would be replaced with an actual fetch call in production:
-        // const response = await fetch('/api/news');
-        // const data = await response.json();
-        // setNews(data.data);
+        await Promise.all(fetchPromises);
         
-        // For demo purposes, we'll use our fallback data with randomized dates
-        const currentDate = new Date();
-        const newsWithUpdatedDates = fallbackNews.map(article => ({
-          ...article,
-          date: new Date(
-            currentDate.getFullYear(),
-            currentDate.getMonth(),
-            currentDate.getDate() - Math.floor(Math.random() * 7)
-          ).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-        }));
-        
-        setNews(newsWithUpdatedDates);
-        
-        console.log("News data fetched successfully");
+        if (newsArticles.length > 0) {
+          // Sort by date (most recent first) and take only 3
+          newsArticles.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          setNews(newsArticles.slice(0, 3));
+        } else {
+          // If no articles were fetched, use fallback data
+          setNews(fallbackNews);
+          toast({
+            title: "Using demo data",
+            description: "Could not connect to news sources. Showing demo content.",
+          });
+        }
       } catch (error) {
         console.error("Error fetching news:", error);
         toast({
@@ -132,9 +158,9 @@ const NewsSection: React.FC = () => {
 
     fetchNews();
     
-    // This would refresh the news data periodically in a real implementation
-    // const refreshInterval = setInterval(fetchNews, 3600000); // Refresh every hour
-    // return () => clearInterval(refreshInterval);
+    // Refresh news once per hour
+    const refreshInterval = setInterval(fetchNews, 3600000);
+    return () => clearInterval(refreshInterval);
   }, [toast]);
 
   return (
