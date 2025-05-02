@@ -44,7 +44,7 @@ const EventCard: React.FC<EventCardProps> = ({ events, title, description }) => 
                     {event.type}
                   </Badge>
                 </div>
-                <p className="text-sm text-muted-foreground">{formatEventDate(event.date as unknown as Date)}</p>
+                <p className="text-sm text-muted-foreground">{formatEventDate(event.date)}</p>
                 <p className="text-sm">{event.description}</p>
                 <p className="text-xs text-muted-foreground">{event.location}</p>
                 

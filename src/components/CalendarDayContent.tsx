@@ -14,12 +14,12 @@ const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
   events 
 }) => {
   const hasEvent = events.some(event => 
-    isSameDay(new Date(event.date), date)
+    isSameDay(event.date, date)
   );
   
   if (hasEvent) {
     const dayEvents = events.filter(event => 
-      isSameDay(new Date(event.date), date)
+      isSameDay(event.date, date)
     );
     
     const eventTypes = [...new Set(dayEvents.map(e => e.type))];

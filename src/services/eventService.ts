@@ -5,7 +5,7 @@ import { format, parseISO } from "date-fns";
 export interface CulinaryEvent {
   id: number;
   title: string;
-  date: string;
+  date: Date; // Changed from string to Date
   type: "festival" | "exhibition" | "holiday" | "conference" | "workshop";
   description: string;
   location: string;
