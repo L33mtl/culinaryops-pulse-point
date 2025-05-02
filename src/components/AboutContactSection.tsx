@@ -138,7 +138,7 @@ const AboutContactSection: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <p className="font-medium">Address</p>
-                  <p className="text-muted-foreground">123 Culinary Boulevard, Foodville, CA 94103</p>
+                  <p className="text-muted-foreground">1275 Rue Saint-Antoine O, Montreal, QC H3C 5L2, Canada</p>
                 </div>
                 <div>
                   <p className="font-medium">Email</p>
@@ -146,15 +146,15 @@ const AboutContactSection: React.FC = () => {
                 </div>
                 <div>
                   <p className="font-medium">Phone</p>
-                  <p className="text-muted-foreground">+1 (555) 123-4567</p>
+                  <p className="text-muted-foreground">+1 (514) 555-7890</p>
                 </div>
               </div>
             </div>
             
-            {/* Embedded Map */}
+            {/* Embedded Map - Updated to Montreal location */}
             <div className="w-full h-64 rounded-xl overflow-hidden shadow-md">
               <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d100939.98555098464!2d-122.50764017417351!3d37.75781499644896!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80859a6d00690021%3A0x4a501367f076adff!2sSan%20Francisco%2C%20CA!5e0!3m2!1sen!2sus!4v1619750833548!5m2!1sen!2sus" 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2796.6324256269487!2d-73.56936708444598!3d45.49748797910133!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4cc91a5a66ab793f%3A0x3b92d0c50f8e6fbe!2sMontreal%2C%20QC%2C%20Canada!5e0!3m2!1sen!2sus!4v1652489930139!5m2!1sen!2sus" 
                 width="100%" 
                 height="100%" 
                 style={{ border: 0 }} 
