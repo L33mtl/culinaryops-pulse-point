@@ -203,15 +203,15 @@ const CalendarSection: React.FC = () => {
                 <ChevronRight className="h-4 w-4 ml-2" />
               </Button>
             </div>
-            <Card>
-              <CardContent className="pt-4">
+            <Card className="w-full">
+              <CardContent className="pt-4 pb-6">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
                   month={viewingMonth}
                   onMonthChange={setViewingMonth}
-                  className="rounded-md border shadow-sm pointer-events-auto"
+                  className="rounded-md border shadow-sm pointer-events-auto w-full max-w-none"
                   components={{
                     DayContent: (props) => {
                       // Make sure we're passing a valid Date object
