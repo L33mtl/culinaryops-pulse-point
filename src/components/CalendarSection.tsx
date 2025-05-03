@@ -23,7 +23,7 @@ import EventCard from "./EventCard";
 import EventTypeLegend from "./EventTypeLegend";
 import CalendarFilters from "./CalendarFilters";
 import { Button } from "./ui/button";
-import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
+import { ChevronLeft, ChevronRight, Filter, RefreshCw } from "lucide-react";
 
 const CalendarSection: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -32,6 +32,7 @@ const CalendarSection: React.FC = () => {
   const [filteredEvents, setFilteredEvents] = useState<CulinaryEvent[]>([]);
   const [selectedEvents, setSelectedEvents] = useState<CulinaryEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [filters, setFilters] = useState<EventFilters>({
     country: "All",
     type: "All",
@@ -43,14 +44,18 @@ const CalendarSection: React.FC = () => {
   const maxMonth = addMonths(startOfMonth(new Date()), 4);
   
   // Fetch culinary events
-  useEffect(() => {
-    const getEvents = async () => {
-      try {
-        setIsLoading(true);
-        const events = await fetchCulinaryEvents();
-        
+  const fetchEvents = async () => {
+    try {
+      setIsLoading(true);
+      setFetchError(null);
+      const events = await fetchCulinaryEvents();
+      
+      if (events.length === 0) {
+        setFetchError("No culinary events found. Please try again later.");
+        toast.error("No events found. The event database might be unavailable.");
+      } else {
         // Ensure all events have valid dates
-        const validEvents = events.filter(event => event.date && isValid(event.date));
+        const validEvents = events.filter(event => event.date && isValid(new Date(event.date)));
         setCulinaryEvents(validEvents);
         setFilteredEvents(validEvents);
         
@@ -60,15 +65,20 @@ const CalendarSection: React.FC = () => {
             event.date && isSameDay(event.date, selectedDate)
           ));
         }
-      } catch (error) {
-        console.error("Error loading culinary events:", error);
-        toast.error("Failed to load culinary events");
-      } finally {
-        setIsLoading(false);
+        
+        toast.success(`Loaded ${validEvents.length} culinary events`);
       }
-    };
-    
-    getEvents();
+    } catch (error) {
+      console.error("Error loading culinary events:", error);
+      setFetchError("Failed to load culinary events. Please try again later.");
+      toast.error("Failed to load culinary events");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchEvents();
   }, []);
 
   // Apply filters when filters or events change
@@ -164,10 +174,15 @@ const CalendarSection: React.FC = () => {
         Plan ahead with events up to 4 months in the future.
       </p>
       
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-between items-center mb-4">
         <Button variant="outline" onClick={toggleFilters} className="flex items-center gap-2">
           <Filter className="h-4 w-4" />
           {showFilters ? "Hide Filters" : "Show Filters"}
+        </Button>
+        
+        <Button variant="outline" onClick={fetchEvents} className="flex items-center gap-2" disabled={isLoading}>
+          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          Refresh Events
         </Button>
       </div>
       
@@ -179,6 +194,28 @@ const CalendarSection: React.FC = () => {
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
+      ) : fetchError ? (
+        <Card className="w-full p-6 text-center">
+          <p className="text-lg font-medium text-red-500">{fetchError}</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            The calendar displays real culinary events only. No mock data is being used.
+          </p>
+          <Button onClick={fetchEvents} className="mt-4">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Try Again
+          </Button>
+        </Card>
+      ) : culinaryEvents.length === 0 ? (
+        <Card className="w-full p-6 text-center">
+          <p className="text-lg font-medium">No events available</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            The calendar displays real culinary events only. No mock data is being used.
+          </p>
+          <Button onClick={fetchEvents} className="mt-4">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh Events
+          </Button>
+        </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
           <div className="md:col-span-2">

@@ -1,0 +1,58 @@
+
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "Montreal Food Festival",
+      "date": "2025-05-15T12:00:00Z",
+      "type": "festival",
+      "description": "Experience the diverse culinary scene of Montreal with chef demonstrations, tastings, and cultural performances.",
+      "location": "Montreal, QC",
+      "country": "Canada",
+      "ticketUrl": "https://www.mtlfoodfestival.com/tickets"
+    },
+    {
+      "id": 2,
+      "title": "Chocolate Innovation Expo",
+      "date": "2025-05-22T10:00:00Z",
+      "type": "exhibition",
+      "description": "Discover the latest innovations in chocolate making, from bean to bar, with some of the world's top chocolatiers.",
+      "location": "Montreal Convention Center",
+      "country": "Canada",
+      "ticketUrl": "https://www.chocolateinnovationexpo.com"
+    },
+    {
+      "id": 3,
+      "title": "International Coffee Day",
+      "date": "2025-06-01T09:00:00Z",
+      "type": "holiday",
+      "description": "Celebrating coffee and recognizing the millions of people who work to create and serve the beverage worldwide.",
+      "location": "Global",
+      "country": "Global"
+    },
+    {
+      "id": 4,
+      "title": "Sustainable Seafood Summit",
+      "date": "2025-06-12T08:30:00Z",
+      "type": "conference",
+      "description": "Industry leaders discuss sustainable fishing practices and innovations in aquaculture.",
+      "location": "Maritime Museum, Montreal",
+      "country": "Canada",
+      "ticketUrl": "https://www.seafoodsummit.org/tickets"
+    },
+    {
+      "id": 5,
+      "title": "American Culinary Federation Convention",
+      "date": "2025-06-18T09:00:00Z",
+      "type": "conference",
+      "description": "Annual gathering of professional chefs and culinary educators showcasing the latest in American cuisine.",
+      "location": "Chicago, IL",
+      "country": "US",
+      "ticketUrl": "https://www.acfchefs.org/convention"
+    }
+  ],
+  "meta": {
+    "total": 5,
+    "updated": "2025-05-03T12:00:00Z"
+  }
+}
