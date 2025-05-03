@@ -24,6 +24,14 @@ const EventTypeLegend: React.FC = () => {
         <span className="h-3 w-3 rounded-full bg-red-500"></span>
         <span className="text-sm">Workshops</span>
       </div>
+      <div className="flex items-center gap-2">
+        <span className="h-3 w-3 rounded-full bg-amber-500"></span>
+        <span className="text-sm">Trade Shows</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="h-3 w-3 rounded-full bg-cyan-500"></span>
+        <span className="text-sm">Speaking Events</span>
+      </div>
     </div>
   );
 };

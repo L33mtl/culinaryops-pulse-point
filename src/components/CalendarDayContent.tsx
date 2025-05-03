@@ -33,6 +33,8 @@ const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
           {eventTypes.includes("exhibition") && <span className="h-1 w-1 rounded-full bg-blue-500"></span>}
           {eventTypes.includes("conference") && <span className="h-1 w-1 rounded-full bg-violet-500"></span>}
           {eventTypes.includes("workshop") && <span className="h-1 w-1 rounded-full bg-red-500"></span>}
+          {eventTypes.includes("trade_show") && <span className="h-1 w-1 rounded-full bg-amber-500"></span>}
+          {eventTypes.includes("speaking") && <span className="h-1 w-1 rounded-full bg-cyan-500"></span>}
         </div>
       </div>
     );

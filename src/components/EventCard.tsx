@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatEventDate } from "@/services/eventService";
+import { MapPin } from "lucide-react";
 import type { CulinaryEvent } from "@/services/eventService";
 
 interface EventCardProps {
@@ -23,8 +24,25 @@ const EventCard: React.FC<EventCardProps> = ({ events, title, description }) => 
         return "secondary";
       case "workshop":
         return "destructive";
+      case "trade_show":
+        return "warning";
+      case "speaking":
+        return "outline";
       default:
         return "outline";
+    }
+  };
+
+  const getEventTypeLabel = (type: string) => {
+    switch (type) {
+      case "festival": return "Festival";
+      case "holiday": return "Food Holiday";
+      case "conference": return "Conference";
+      case "workshop": return "Workshop";
+      case "exhibition": return "Exhibition";
+      case "trade_show": return "Trade Show";
+      case "speaking": return "Speaking Event";
+      default: return type;
     }
   };
 
@@ -41,28 +59,39 @@ const EventCard: React.FC<EventCardProps> = ({ events, title, description }) => 
                 <div className="flex justify-between items-start">
                   <h4 className="font-medium">{event.title}</h4>
                   <Badge variant={getBadgeVariant(event.type)}>
-                    {event.type}
+                    {getEventTypeLabel(event.type)}
                   </Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">{formatEventDate(event.date)}</p>
                 <p className="text-sm">{event.description}</p>
-                <p className="text-xs text-muted-foreground">{event.location}</p>
                 
-                {event.ticketUrl && (
-                  <Button asChild size="sm" className="mt-2">
-                    <a href={event.ticketUrl} target="_blank" rel="noopener noreferrer">
-                      Purchase Tickets
-                    </a>
-                  </Button>
-                )}
+                <div className="flex items-center text-xs text-muted-foreground gap-1 mt-1">
+                  <MapPin className="h-3 w-3" />
+                  <span>{event.location}</span>
+                  {event.country && event.country !== "Global" && (
+                    <Badge variant="outline" className="text-xs ml-1">
+                      {event.country}
+                    </Badge>
+                  )}
+                </div>
                 
-                {!event.ticketUrl && event.url && (
-                  <Button asChild size="sm" variant="outline" className="mt-2">
-                    <a href={event.url} target="_blank" rel="noopener noreferrer">
-                      Event Details
-                    </a>
-                  </Button>
-                )}
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {event.ticketUrl && (
+                    <Button asChild size="sm" className="mt-2">
+                      <a href={event.ticketUrl} target="_blank" rel="noopener noreferrer">
+                        Purchase Tickets
+                      </a>
+                    </Button>
+                  )}
+                  
+                  {!event.ticketUrl && event.url && (
+                    <Button asChild size="sm" variant="outline" className="mt-2">
+                      <a href={event.url} target="_blank" rel="noopener noreferrer">
+                        Event Details
+                      </a>
+                    </Button>
+                  )}
+                </div>
               </div>
             ))
           ) : (

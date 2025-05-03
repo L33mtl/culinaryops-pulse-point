@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   format, 
   addMonths, 
@@ -12,20 +11,33 @@ import {
   getMonth,
   getYear
 } from "date-fns";
-import { fetchCulinaryEvents, type CulinaryEvent } from "@/services/eventService";
+import { 
+  fetchCulinaryEvents, 
+  filterEvents,
+  type CulinaryEvent, 
+  type EventFilters 
+} from "@/services/eventService";
 import { toast } from "sonner";
 import CalendarDayContent from "./CalendarDayContent";
 import EventCard from "./EventCard";
 import EventTypeLegend from "./EventTypeLegend";
+import CalendarFilters from "./CalendarFilters";
 import { Button } from "./ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
 
 const CalendarSection: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [viewingMonth, setViewingMonth] = useState<Date>(startOfMonth(new Date()));
   const [culinaryEvents, setCulinaryEvents] = useState<CulinaryEvent[]>([]);
+  const [filteredEvents, setFilteredEvents] = useState<CulinaryEvent[]>([]);
   const [selectedEvents, setSelectedEvents] = useState<CulinaryEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [filters, setFilters] = useState<EventFilters>({
+    country: "All",
+    type: "All",
+    month: "All"
+  });
+  const [showFilters, setShowFilters] = useState(false);
   
   // Calculate max month (4 months from now)
   const maxMonth = addMonths(startOfMonth(new Date()), 4);
@@ -40,6 +52,7 @@ const CalendarSection: React.FC = () => {
         // Ensure all events have valid dates
         const validEvents = events.filter(event => event.date && isValid(event.date));
         setCulinaryEvents(validEvents);
+        setFilteredEvents(validEvents);
         
         // Set initial selected events
         if (selectedDate) {
@@ -57,21 +70,34 @@ const CalendarSection: React.FC = () => {
     
     getEvents();
   }, []);
+
+  // Apply filters when filters or events change
+  useEffect(() => {
+    const filtered = filterEvents(culinaryEvents, filters);
+    setFilteredEvents(filtered);
+    
+    // Update selected events if a date is selected
+    if (selectedDate) {
+      setSelectedEvents(filtered.filter(event => 
+        isSameDay(event.date, selectedDate)
+      ));
+    }
+  }, [filters, culinaryEvents, selectedDate]);
   
   // Update selected events when date changes
   useEffect(() => {
     if (selectedDate) {
-      setSelectedEvents(culinaryEvents.filter(event => 
+      setSelectedEvents(filteredEvents.filter(event => 
         isSameDay(event.date, selectedDate)
       ));
     } else {
       setSelectedEvents([]);
     }
-  }, [selectedDate, culinaryEvents]);
+  }, [selectedDate, filteredEvents]);
 
   // Get events for the currently viewed month
   const getCurrentMonthEvents = () => {
-    return culinaryEvents.filter(event => {
+    return filteredEvents.filter(event => {
       const eventDate = event.date;
       return isValid(eventDate) && 
              getMonth(eventDate) === getMonth(viewingMonth) && 
@@ -124,6 +150,10 @@ const CalendarSection: React.FC = () => {
            getYear(viewingMonth) === getYear(maxMonth);
   };
 
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
+
   return (
     <section id="calendar" className="section">
       <h2 className="section-title">
@@ -133,6 +163,17 @@ const CalendarSection: React.FC = () => {
         Discover upcoming culinary events, food holidays, and exhibitions from across Canada and the US.
         Plan ahead with events up to 4 months in the future.
       </p>
+      
+      <div className="flex justify-end mb-4">
+        <Button variant="outline" onClick={toggleFilters} className="flex items-center gap-2">
+          <Filter className="h-4 w-4" />
+          {showFilters ? "Hide Filters" : "Show Filters"}
+        </Button>
+      </div>
+      
+      {showFilters && (
+        <CalendarFilters filters={filters} setFilters={setFilters} />
+      )}
 
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
@@ -176,7 +217,7 @@ const CalendarSection: React.FC = () => {
                       <CalendarDayContent 
                         date={props.date} 
                         displayMonth={viewingMonth} 
-                        events={culinaryEvents} 
+                        events={filteredEvents} 
                       />
                     ),
                   }}
