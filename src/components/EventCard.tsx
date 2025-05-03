@@ -25,9 +25,11 @@ const EventCard: React.FC<EventCardProps> = ({ events, title, description }) => 
       case "workshop":
         return "destructive";
       case "trade_show":
-        return "warning";
+        return "outline";  // Changed from "warning" to "outline" for compatibility
       case "speaking":
         return "outline";
+      case "exhibition":
+        return "default";
       default:
         return "outline";
     }
