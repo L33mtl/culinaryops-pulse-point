@@ -57,7 +57,7 @@ const CalendarSection: React.FC = () => {
         // Set initial selected events
         if (selectedDate) {
           setSelectedEvents(validEvents.filter(event => 
-            isSameDay(event.date, selectedDate)
+            event.date && isSameDay(event.date, selectedDate)
           ));
         }
       } catch (error) {
@@ -99,7 +99,7 @@ const CalendarSection: React.FC = () => {
   const getCurrentMonthEvents = () => {
     return filteredEvents.filter(event => {
       const eventDate = event.date;
-      return isValid(eventDate) && 
+      return eventDate && isValid(eventDate) && 
              getMonth(eventDate) === getMonth(viewingMonth) && 
              getYear(eventDate) === getYear(viewingMonth);
     });
@@ -213,13 +213,19 @@ const CalendarSection: React.FC = () => {
                   onMonthChange={setViewingMonth}
                   className="rounded-md border shadow-sm pointer-events-auto"
                   components={{
-                    DayContent: (props) => (
-                      <CalendarDayContent 
-                        date={props.date} 
-                        displayMonth={viewingMonth} 
-                        events={filteredEvents} 
-                      />
-                    ),
+                    DayContent: (props) => {
+                      // Make sure we're passing a valid Date object
+                      if (!props.date || !(props.date instanceof Date) || isNaN(props.date.getTime())) {
+                        return <>-</>;
+                      }
+                      return (
+                        <CalendarDayContent 
+                          date={props.date} 
+                          displayMonth={viewingMonth} 
+                          events={filteredEvents} 
+                        />
+                      );
+                    },
                   }}
                 />
               </CardContent>

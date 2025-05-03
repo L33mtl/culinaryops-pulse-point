@@ -1,6 +1,6 @@
 
 import { toast } from "sonner";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, isValid } from "date-fns";
 
 export type EventType = "festival" | "exhibition" | "holiday" | "conference" | "workshop" | "trade_show" | "speaking";
 export type Country = "Canada" | "US" | "Global";
@@ -41,10 +41,27 @@ export async function fetchCulinaryEvents(): Promise<CulinaryEvent[]> {
     
     const data = JSON.parse(text);
     
-    return data.data.map((event: any) => ({
-      ...event,
-      date: event.date ? parseISO(event.date) : new Date()
-    }));
+    const events = data.data.map((event: any) => {
+      let eventDate;
+      try {
+        eventDate = event.date ? parseISO(event.date) : new Date();
+        // Validate the date is actually valid
+        if (!isValid(eventDate)) {
+          console.warn(`Invalid date for event ${event.title}: ${event.date}`);
+          eventDate = new Date(); // Fallback to current date
+        }
+      } catch (error) {
+        console.warn(`Error parsing date for event ${event.title}: ${event.date}`);
+        eventDate = new Date(); // Fallback to current date
+      }
+      
+      return {
+        ...event,
+        date: eventDate
+      };
+    });
+    
+    return events;
   } catch (error) {
     console.error("Error fetching culinary events:", error);
     toast.error("Failed to load culinary events");
@@ -202,5 +219,8 @@ function getDefaultEvents(): CulinaryEvent[] {
 }
 
 export function formatEventDate(date: Date): string {
+  if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+    return "Date unavailable";
+  }
   return format(date, "MMMM d, yyyy");
 }

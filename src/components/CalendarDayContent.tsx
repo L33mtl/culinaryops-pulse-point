@@ -13,13 +13,18 @@ const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
   date, 
   events 
 }) => {
+  // Early return with just the date number if date is invalid
+  if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+    return <>-</>;
+  }
+  
   const hasEvent = events.some(event => 
-    isSameDay(event.date, date)
+    event.date && isSameDay(event.date, date)
   );
   
   if (hasEvent) {
     const dayEvents = events.filter(event => 
-      isSameDay(event.date, date)
+      event.date && isSameDay(event.date, date)
     );
     
     const eventTypes = [...new Set(dayEvents.map(e => e.type))];
