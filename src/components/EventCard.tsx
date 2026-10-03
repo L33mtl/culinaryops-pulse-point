@@ -4,7 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatEventDate } from "@/services/eventService";
-import { MapPin } from "lucide-react";
+import { downloadEventIcs } from "@/lib/ics";
+import { CalendarPlus, MapPin } from "lucide-react";
 import type { CulinaryEvent } from "@/services/eventService";
 
 interface EventCardProps {
@@ -93,6 +94,16 @@ const EventCard: React.FC<EventCardProps> = ({ events, title, description }) => 
                       </a>
                     </Button>
                   )}
+                  
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="mt-2"
+                    onClick={() => downloadEventIcs(event)}
+                  >
+                    <CalendarPlus className="h-4 w-4 mr-1" />
+                    Add to Calendar
+                  </Button>
                 </div>
               </div>
             ))
