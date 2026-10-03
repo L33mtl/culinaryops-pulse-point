@@ -6,6 +6,9 @@ import {
   format, 
   addMonths, 
   isSameDay, 
+  isSameMonth,
+  isAfter,
+  isBefore,
   isValid,
   startOfMonth,
   getMonth,
@@ -116,13 +119,12 @@ const CalendarSection: React.FC = () => {
   };
 
   // Navigation handlers
+  // Compare full dates (not month numbers) so ranges spanning a new year work
   const goToPreviousMonth = () => {
-    const currentDate = new Date();
     const newMonth = addMonths(viewingMonth, -1);
     
     // Don't allow going before current month
-    if (getMonth(newMonth) >= getMonth(currentDate) && 
-        getYear(newMonth) >= getYear(currentDate)) {
+    if (!isBefore(newMonth, startOfMonth(new Date()))) {
       setViewingMonth(newMonth);
     }
   };
@@ -131,8 +133,7 @@ const CalendarSection: React.FC = () => {
     const newMonth = addMonths(viewingMonth, 1);
     
     // Don't allow going past max month (4 months from now)
-    if (getMonth(newMonth) <= getMonth(maxMonth) && 
-        getYear(newMonth) <= getYear(maxMonth)) {
+    if (!isAfter(newMonth, maxMonth)) {
       setViewingMonth(newMonth);
     }
   };
@@ -148,17 +149,10 @@ const CalendarSection: React.FC = () => {
   };
 
   // Check if we're at the current month to disable previous button
-  const isCurrentMonth = () => {
-    const currentDate = new Date();
-    return getMonth(viewingMonth) === getMonth(currentDate) &&
-           getYear(viewingMonth) === getYear(currentDate);
-  };
+  const isCurrentMonth = () => isSameMonth(viewingMonth, new Date());
   
   // Check if we're at max month to disable next button
-  const isMaxMonth = () => {
-    return getMonth(viewingMonth) === getMonth(maxMonth) &&
-           getYear(viewingMonth) === getYear(maxMonth);
-  };
+  const isMaxMonth = () => isSameMonth(viewingMonth, maxMonth);
 
   const toggleFilters = () => {
     setShowFilters(!showFilters);
